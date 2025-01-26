@@ -1,11 +1,11 @@
-import { Box, Flex, Text, Icon, useColorModeValue } from "@chakra-ui/react";
+import { Box, Flex, Text, Icon, useColorModeValue, useMediaQuery} from "@chakra-ui/react";
 import { ChatIcon } from "@chakra-ui/icons";
 import ColorToggleButton from "./ColorToggleButton";
 
 const ChatContainer = ({ children ,isLoading}) => {
   const bg = useColorModeValue("gray.50", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
-
+  const [isMobile] = useMediaQuery("(max-width: 768px)");
   return (
     <Flex
       direction="column"
@@ -19,9 +19,10 @@ const ChatContainer = ({ children ,isLoading}) => {
       mx="auto"
       mt={0}
       shadow="md"
+      
     >
       {/* Header */}
-      <Flex
+      {!isMobile ? (<Flex
         bg={useColorModeValue("blue.500", "blue.700")}
         color="white"
         align="center"
@@ -43,10 +44,17 @@ const ChatContainer = ({ children ,isLoading}) => {
         </Flex>
         </Flex>
         {/* Small toggle button */}
-       
-
         <ColorToggleButton />
-      </Flex>
+      </Flex>):(<Flex
+        bg={useColorModeValue("blue.500", "blue.700")}
+        color="white"
+        align="center"
+        justify="space-between"
+        px={4}
+        py={4}
+        // borderTopRadius="md"
+      >
+      </Flex>)}
 
       {/* Main chat area */}
       <Box

@@ -1,10 +1,23 @@
-import { Box, HStack, Icon, Text } from "@chakra-ui/react";
+import { Box, HStack, Icon, Text, useColorMode } from "@chakra-ui/react";
 import { FaUser, FaRobot } from "react-icons/fa";
+import MessageDisplay from "./MessageDisplay";
+import ReactMarkdown from "react-markdown";
+const Message = ({ message = "", isUser = false }) => {
+  const { colorMode } = useColorMode(); // Get the current theme mode
+  const isDark = colorMode === "dark";
 
-const Message = ({ message, isUser }) => {
+  // Shared styles for message box
+  const messageBoxStyles = {
+    px: 4,
+    py: 2,
+    borderRadius: "lg",
+    maxW: "75%",
+    fontSize: "sm",
+  };
+
   return (
     <HStack
-      justifyContent={isUser ? "flex-end" : "flex-start"} // Align user messages to the right and bot messages to the left
+      justifyContent={isUser ? "flex-end" : "flex-start"}
       spacing={2}
       maxW="100%"
       mb={2}
@@ -12,16 +25,20 @@ const Message = ({ message, isUser }) => {
       {/* Bot's message layout */}
       {!isUser && (
         <>
-          <Icon as={FaRobot} boxSize={5} color="blue.500" />
+          <Icon
+            as={FaRobot}
+            boxSize={5}
+            color={isDark ? "blue.300" : "blue.500"}
+            aria-label="Bot Icon"
+          />
           <Box
-            bg="gray.200"
-            color="black"
-            px={4}
-            py={2}
-            borderRadius="lg"
-            maxW="75%"
+            bg={isDark ? "gray.600" : "gray.200"}
+            color={isDark ? "gray.100" : "black"}
+            {...messageBoxStyles}
           >
-            <Text fontSize="sm">{message}</Text>
+            <MessageDisplay message={message}/>
+            {/* <Text>{message}</Text> */}
+            {/* <ReactMarkdown>{message}</ReactMarkdown> */}
           </Box>
         </>
       )}
@@ -30,16 +47,18 @@ const Message = ({ message, isUser }) => {
       {isUser && (
         <>
           <Box
-            bg="blue.500"
+            bg={isDark ? "blue.400" : "blue.500"}
             color="white"
-            px={4}
-            py={2}
-            borderRadius="lg"
-            maxW="75%"
+            {...messageBoxStyles}
           >
-            <Text fontSize="sm">{message}</Text>
+            <Text>{message}</Text>
           </Box>
-          <Icon as={FaUser} boxSize={5} color="green.500" />
+          <Icon
+            as={FaUser}
+            boxSize={5}
+            color={isDark ? "green.300" : "green.500"}
+            aria-label="User Icon"
+          />
         </>
       )}
     </HStack>

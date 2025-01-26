@@ -1,79 +1,126 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "./components/SideBar";
 import ChatContainer from "./components/ChatContainer";
 import MessageContainer from "./components/MessageContainer";
 import MessageInput from "./components/MessageInput";
+import Greetings from "./components/Greetings";
 import SampleQuestions from "./components/SampleQuestions";
-import Message from "./components/Message";
-import {
+import { Flex, Box } from "@chakra-ui/react";
+import "./App.css";
 
-  Flex,Box
-  
-} from "@chakra-ui/react";
-import "./App.css"
 const App = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [recentPrompt, setRecentPrompt] = useState("");
-  const [prevPrompts, setPrevPrompts] = useState([]);
+  const [conversationHistory, setConversationHistory] = useState([]);
+  const [currentChatIndex, setCurrentChatIndex] = useState(null);
+
+  useEffect(() => {
+    const savedHistory =
+      JSON.parse(localStorage.getItem("conversationHistory")) || [];
+    const savedMessages = JSON.parse(localStorage.getItem("currentChat")) || [];
+    setConversationHistory(savedHistory);
+    setMessages(savedMessages);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "conversationHistory",
+      JSON.stringify(conversationHistory)
+    );
+  }, [conversationHistory]);
+
+  useEffect(() => {
+    localStorage.setItem("currentChat", JSON.stringify(messages));
+  }, [messages]);
+
+  const saveChatToHistory = (newMessages) => {
+    const updatedHistory = [...conversationHistory];
+
+    if (currentChatIndex !== null) {
+      // Update the existing chat in history
+      updatedHistory[currentChatIndex] = {
+        ...updatedHistory[currentChatIndex],
+        messages: newMessages || messages,
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // Create a new chat in history
+      updatedHistory.push({
+        messages: newMessages || messages,
+        timestamp: new Date().toISOString(),
+      });
+      setCurrentChatIndex(updatedHistory.length - 1); // Set index for the new chat
+    }
+
+    setConversationHistory(updatedHistory);
+  };
 
   const handleSend = (text) => {
-    setMessages([
-      ...messages,
-      <Message key={messages.length} message={text} isUser={true} />,
-    ]);
+    const userMessage = { text, isUser: true };
+    const updatedMessages = [...messages, userMessage];
+
+    setMessages(updatedMessages); // Update messages state
     setLoading(true);
 
-    // Simulate API call
+    saveChatToHistory(updatedMessages); // Save to history after user sends a message
+
     setTimeout(() => {
-      const botResponse = `Here's what I found: ${text}`;
-      setMessages((prev) => [
-        ...prev,
-        <Message key={prev.length} message={botResponse} isUser={false} />,
-      ]);
-      setPrevPrompts((prev) => [...prev, text]); // Store the user's prompt
+      const botResponse = { text: `Here's what I found: ${text}`, isUser: false };
+      const newMessages = [...updatedMessages, botResponse];
+
+      setMessages(newMessages); // Update with bot response
       setLoading(false);
+
+      saveChatToHistory(newMessages); // Save updated chat with bot response
     }, 2000);
   };
 
   const newChat = () => {
-    setMessages([]);
-    setRecentPrompt("");
+    if (messages.length > 0) {
+      saveChatToHistory(); // Save the current chat if it exists
+      setMessages([]); // Clear messages
+      setCurrentChatIndex(null); // Reset index
+      localStorage.removeItem("currentChat");
+    }
+  };
+
+  const onLoadConversation = (index) => {
+    saveChatToHistory(); // Save the current chat if it exists
+    const selectedConversation = conversationHistory[index];
+    if (selectedConversation) {
+      setMessages(selectedConversation.messages); // Load selected chat messages
+      setCurrentChatIndex(index); // Set the current chat index
+    }
   };
 
   return (
     <Flex h="100vh" w="100vw" overflow="hidden">
       <Sidebar
-        onSent={handleSend}
-        prevPrompts={prevPrompts}
-        setRecentPrompt={setRecentPrompt}
+        conversationHistory={conversationHistory}
+        setConversationHistory={setConversationHistory}
+        onLoadConversation={onLoadConversation}
         newChat={newChat}
+        isLoading={loading}
       />
       <ChatContainer isLoading={loading}>
-        {!messages.length && !loading ? (
-          <Box
-      flex="1"
-      overflowY="auto"
-      p={4}
-      bg="gray.50"
-      borderRadius="md"
-      minH="70vh"
-      maxH="70vh" // Optional: To constrain the height of the message area
-    >
-          
-          <Box>
-          <SampleQuestions onClick={handleSend} />
-          <div className="greet">
-							<p>
-								<span>Hello , Dev </span>
-							</p>
-							<p>How Can i Help You Today?</p>
-						</div>
-            </Box>
+        <Box
+          flex="1"
+          overflowY="auto"
+          p={4}
+          bg="gray.50"
+          borderRadius="md"
+          minH="70vh"
+          maxH="70vh"
+        >
+          {!messages.length && !loading ? (
+            <>
+              <SampleQuestions onClick={handleSend} />
+              <Greetings />
+            </>
+          ) : (
+            <MessageContainer messages={messages} isLoading={loading} />
+          )}
         </Box>
-        ) : (
-          <MessageContainer messages={messages} isLoading={loading} />
-        )}
         <MessageInput onSend={handleSend} isLoading={loading} />
       </ChatContainer>
     </Flex>

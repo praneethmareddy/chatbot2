@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
-import { Box ,HStack,Skeleton } from "@chakra-ui/react";
-
-const MessageContainer = ({ messages ,isLoading}) => {
+import Message from "./Message"; // Import the Message component
+import LoadingSkeleton from "./LoadingSkeleton";
+const MessageContainer = ({ messages, isLoading }) => {
   const bottomRef = useRef(null); // Ref to track the bottom of the container
 
   useEffect(() => {
@@ -10,39 +10,20 @@ const MessageContainer = ({ messages ,isLoading}) => {
   }, [messages]);
 
   return (
-    <Box
-      flex="1"
-      overflowY="auto"
-      p={4}
-      bg="gray.50"
-      borderRadius="md"
-      minH="70vh"
-      maxH="70vh" // Optional: To constrain the height of the message area
-    >
+   <>
       {messages.map((message, index) => (
-        <React.Fragment key={index}>{message}</React.Fragment>
+        <Message
+          key={index}
+          message={message.text} // Render plain text from the message object
+          isUser={message.isUser} // Pass the isUser property
+        />
       ))}
       {isLoading && (
-        <HStack
-          justifyContent="flex-start" // Skeleton aligns like a bot message
-          spacing={2}
-          maxW="100%"
-          mb={2}
-        >
-        <Skeleton
-  height="30px"
-  width="60%"
-  borderRadius="lg"
-  startColor="gray.200" // Lighter start color
-  endColor="gray.400"  // Lighter end color
-  opacity={0.6}        // Slightly reduce opacity
-/>
-
-        </HStack>
+       <LoadingSkeleton/>
       )}
       {/* Invisible div to ensure we scroll to the bottom */}
       <div ref={bottomRef}></div>
-    </Box>
+      </>
   );
 };
 

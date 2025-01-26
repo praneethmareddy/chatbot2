@@ -9,7 +9,12 @@ const SampleQuestions = ({ onClick }) => {
   ];
 
   return (
-    <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4} mt={4} className="main cards">
+    <SimpleGrid
+      columns={{ base: 1, sm: 2, md: 2 }}
+      spacing={{ base: 2, sm: 3, md: 4 }} // Dynamic spacing based on screen size
+      mt={4}
+      className="main cards"
+    >
       {sampleQuestions.map((question, index) => (
         <Box
           key={index}
@@ -19,18 +24,23 @@ const SampleQuestions = ({ onClick }) => {
           p={4}
           cursor="pointer"
           position="relative"
-          height="6rem"
+          height={{ base: "3rem", sm: "4rem", md: "5rem" }} // Dynamic height
           _hover={{ bg: "#dfe4ea" }}
           onClick={() => onClick(question)}
         >
-          <Text fontSize="17px" color="#585858" mb={2}>
+          <Text
+            fontSize={{ base: "14px", sm: "16px", md: "17px" }} // Dynamic font size
+            color="#585858"
+            mb={2}
+            isTruncated // Truncate text with "..." if it overflows
+          >
             {question}
           </Text>
           <Image
-            src="https://cdn-icons-png.flaticon.com/512/3566/3566345.png" // Sample icon
+            src="./search.png" // Sample icon
             alt="Question Icon"
-            w="35px"
-            h="35px"
+            w={{ base: 4, sm: 5, md: 6 }} // Dynamic size
+            h={{ base: 4, sm: 5, md: 6 }}
             position="absolute"
             bottom="10px"
             right="10px"

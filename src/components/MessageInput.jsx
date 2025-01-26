@@ -24,7 +24,7 @@ const MessageInput = ({ onSend, isLoading }) => {
         <Skeleton height="40px" flex="1" borderRadius="md" />
       ) : ( */}
         <Input
-          placeholder="Type a message..."
+          placeholder="Type your query..."
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
